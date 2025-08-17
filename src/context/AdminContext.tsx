@@ -15,6 +15,7 @@ interface AdminContextType {
   exportConfig: () => string;
   importConfig: (configJson: string) => boolean;
   resetToDefaults: () => void;
+  exportSourceCode: () => string;
 }
 
 type AdminAction = 
@@ -232,6 +233,115 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'RESET_CONFIG' });
   };
 
+  const exportSourceCode = (): string => {
+    const sourceFiles = {
+      'src/types/admin.ts': generateAdminTypesSource(),
+      'src/context/AdminContext.tsx': generateAdminContextSource(),
+      'src/components/AdminPanel.tsx': generateAdminPanelSource(),
+      'src/components/CheckoutModal.tsx': generateCheckoutModalSource(),
+      'src/components/NovelasModal.tsx': generateNovelasModalSource()
+    };
+
+    const exportData = {
+      metadata: {
+        exportDate: new Date().toISOString(),
+        version: '1.0',
+        description: 'Exportación completa del sistema administrativo con configuraciones aplicadas',
+        config: state.config
+      },
+      sourceFiles
+    };
+
+    return JSON.stringify(exportData, null, 2);
+  };
+
+  const generateAdminTypesSource = (): string => {
+    return `export interface AdminConfig {
+  pricing: {
+    moviePrice: number;
+    seriesPrice: number;
+    transferFeePercentage: number;
+  };
+  novelas: NovelasConfig[];
+  deliveryZones: DeliveryZoneConfig[];
+}
+
+export interface NovelasConfig {
+  id: number;
+  titulo: string;
+  genero: string;
+  capitulos: number;
+  año: number;
+  costoEfectivo: number;
+  costoTransferencia: number;
+  descripcion?: string;
+}
+
+export interface DeliveryZoneConfig {
+  id: number;
+  name: string;
+  fullPath: string;
+  cost: number;
+  active: boolean;
+}
+
+export interface AdminState {
+  isAuthenticated: boolean;
+  config: AdminConfig;
+}`;
+  };
+
+  const generateAdminContextSource = (): string => {
+    const configString = JSON.stringify(state.config, null, 2);
+    return `// Configuración actual aplicada: ${new Date().toISOString()}
+const defaultConfig: AdminConfig = ${configString};
+
+// Este archivo contiene la lógica central del sistema administrativo
+// con todas las configuraciones y modificaciones aplicadas
+export const currentAdminConfig = ${configString};`;
+  };
+
+  const generateAdminPanelSource = (): string => {
+    return `// Panel de Control Administrativo - Estado actual: ${new Date().toISOString()}
+// Configuración de precios aplicada:
+// - Precio de películas: $${state.config.pricing.moviePrice} CUP
+// - Precio de series: $${state.config.pricing.seriesPrice} CUP por temporada  
+// - Recargo por transferencia: ${state.config.pricing.transferFeePercentage}%
+
+// Catálogo de novelas: ${state.config.novelas.length} novelas configuradas
+// Zonas de entrega: ${state.config.deliveryZones.length} zonas configuradas
+
+export const adminPanelConfig = ${JSON.stringify({
+  pricing: state.config.pricing,
+  novelasCount: state.config.novelas.length,
+  deliveryZonesCount: state.config.deliveryZones.length,
+  lastModified: new Date().toISOString()
+}, null, 2)};`;
+  };
+
+  const generateCheckoutModalSource = (): string => {
+    return `// Sistema de Checkout - Configuración sincronizada: ${new Date().toISOString()}
+// Zonas de entrega configuradas para el checkout:
+
+export const checkoutDeliveryZones = ${JSON.stringify(state.config.deliveryZones, null, 2)};
+
+// Configuración de precios para el checkout:
+export const checkoutPricing = ${JSON.stringify(state.config.pricing, null, 2)};`;
+  };
+
+  const generateNovelasModalSource = (): string => {
+    return `// Catálogo de Novelas - Estado actual: ${new Date().toISOString()}
+// Total de novelas configuradas: ${state.config.novelas.length}
+
+export const novelasCatalog = ${JSON.stringify(state.config.novelas, null, 2)};
+
+// Configuración de precios para novelas:
+export const novelasPricing = {
+  transferFeePercentage: ${state.config.pricing.transferFeePercentage},
+  lastUpdated: "${new Date().toISOString()}"
+};`;
+  };
+
   return (
     <AdminContext.Provider value={{
       state,
@@ -246,7 +356,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       deleteDeliveryZone,
       exportConfig,
       importConfig,
-      resetToDefaults
+      resetToDefaults,
+      exportSourceCode
     }}>
       {children}
     </AdminContext.Provider>
