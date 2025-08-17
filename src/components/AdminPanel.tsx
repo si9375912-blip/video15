@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Settings, DollarSign, BookOpen, Download, Upload, RotateCcw, Save, Plus, Edit3, Trash2, Eye, EyeOff, MapPin } from 'lucide-react';
+import { X, Settings, DollarSign, BookOpen, Download, Upload, RotateCcw, Save, Plus, Edit3, Trash2, Eye, EyeOff, MapPin, Code, FileText } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
 import type { NovelasConfig, DeliveryZoneConfig } from '../types/admin';
 
@@ -9,7 +9,7 @@ interface AdminPanelProps {
 }
 
 export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
-  const { state, logout, updatePricing, addNovela, updateNovela, deleteNovela, addDeliveryZone, updateDeliveryZone, deleteDeliveryZone, exportConfig, importConfig, resetToDefaults } = useAdmin();
+  const { state, logout, updatePricing, addNovela, updateNovela, deleteNovela, addDeliveryZone, updateDeliveryZone, deleteDeliveryZone, exportConfig, importConfig, resetToDefaults, exportSourceCode } = useAdmin();
   const [activeTab, setActiveTab] = useState<'pricing' | 'novelas' | 'delivery' | 'backup'>('pricing');
   const [showPassword, setShowPassword] = useState(false);
   
@@ -134,6 +134,20 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     alert('Configuración exportada correctamente');
+  };
+
+  const handleExportSourceCode = () => {
+    const sourceCodeData = exportSourceCode();
+    const blob = new Blob([sourceCodeData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tv-a-la-carta-source-export-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    alert('Código fuente del sistema exportado correctamente');
   };
 
   const handleImport = () => {
@@ -740,7 +754,7 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                     Sistema de Backup y Restauración
                   </h3>
                   <p className="text-green-700 mb-6">
-                    Exporte e importe la configuración completa del sistema (precios, novelas y zonas de entrega) para crear respaldos o migrar configuraciones.
+                    Exporte e importe la configuración completa del sistema (precios, novelas y zonas de entrega) para crear respaldos o migrar configuraciones. También puede exportar el código fuente del sistema administrativo.
                   </p>
 
                   <div className="space-y-6">
@@ -753,13 +767,59 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       <p className="text-gray-600 mb-4">
                         Descargue un archivo JSON con toda la configuración actual del sistema (precios, novelas y zonas de entrega).
                       </p>
-                      <button
-                        onClick={handleExport}
-                        className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center"
-                      >
-                        <Download className="h-5 w-5 mr-2" />
-                        Exportar Configuración
-                      </button>
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <button
+                          onClick={handleExport}
+                          className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
+                        >
+                          <Download className="h-5 w-5 mr-2" />
+                          Exportar Configuración
+                        </button>
+                        <button
+                          onClick={handleExportSourceCode}
+                          className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
+                        >
+                          <Code className="h-5 w-5 mr-2" />
+                          Exportar Código Fuente
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Source Code Export Info */}
+                    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-200 shadow-sm">
+                      <h4 className="text-lg font-bold text-purple-900 mb-4 flex items-center">
+                        <FileText className="h-5 w-5 mr-2 text-purple-600" />
+                        Exportación de Código Fuente del Sistema
+                      </h4>
+                      <div className="text-purple-700 space-y-3">
+                        <p className="font-medium">
+                          La exportación de código fuente incluye los siguientes archivos del sistema administrativo con todas las configuraciones aplicadas:
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 ml-4 text-sm">
+                          <li><code className="bg-purple-100 px-2 py-1 rounded">src/types/admin.ts</code> - Definiciones de tipos y estructuras de datos</li>
+                          <li><code className="bg-purple-100 px-2 py-1 rounded">src/context/AdminContext.tsx</code> - Lógica central del sistema administrativo</li>
+                          <li><code className="bg-purple-100 px-2 py-1 rounded">src/components/AdminPanel.tsx</code> - Interfaz del panel de control</li>
+                          <li><code className="bg-purple-100 px-2 py-1 rounded">src/components/CheckoutModal.tsx</code> - Sistema de checkout sincronizado</li>
+                          <li><code className="bg-purple-100 px-2 py-1 rounded">src/components/NovelasModal.tsx</code> - Catálogo de novelas sincronizado</li>
+                        </ul>
+                        <div className="bg-white rounded-lg p-4 border border-purple-200 mt-4">
+                          <h5 className="font-semibold text-purple-900 mb-2">Estado Actual del Sistema:</h5>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-green-600">${state.config.pricing.moviePrice}</div>
+                              <div className="text-purple-600">Precio Películas</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-blue-600">{state.config.novelas.length}</div>
+                              <div className="text-purple-600">Novelas</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-orange-600">{state.config.deliveryZones.length}</div>
+                              <div className="text-purple-600">Zonas Entrega</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Import Section */}
