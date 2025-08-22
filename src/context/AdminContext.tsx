@@ -51,4 +51,4 @@ export const useAdmin = (): AdminContextType => {
   return context;
 };
 
-export default AdminContext;
+export { AdminContext };
