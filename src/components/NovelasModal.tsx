@@ -492,17 +492,25 @@ export function NovelasModal({ isOpen, onClose }: NovelasModalProps) {
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                       <input
                         type="text"
-                        placeholder="Buscar por título..."
+                        placeholder="Buscar novelas por título..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white shadow-sm hover:shadow-md transition-all duration-300 placeholder-gray-400 text-gray-900"
                       />
+                      {searchTerm && (
+                        <button
+                          onClick={() => setSearchTerm('')}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                     
                     <select
                       value={selectedGenre}
                       onChange={(e) => setSelectedGenre(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white shadow-sm hover:shadow-md transition-all duration-300"
                     >
                       <option value="">Todos los géneros</option>
                       {uniqueGenres.map(genre => (
@@ -513,7 +521,7 @@ export function NovelasModal({ isOpen, onClose }: NovelasModalProps) {
                     <select
                       value={selectedYear}
                       onChange={(e) => setSelectedYear(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white shadow-sm hover:shadow-md transition-all duration-300"
                     >
                       <option value="">Todos los años</option>
                       {uniqueYears.map(year => (
@@ -525,7 +533,7 @@ export function NovelasModal({ isOpen, onClose }: NovelasModalProps) {
                       <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as 'titulo' | 'año' | 'capitulos')}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        className="flex-1 px-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm bg-white shadow-sm hover:shadow-md transition-all duration-300"
                       >
                         <option value="titulo">Título</option>
                         <option value="año">Año</option>
@@ -534,7 +542,7 @@ export function NovelasModal({ isOpen, onClose }: NovelasModalProps) {
                       
                       <button
                         onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                        className="px-3 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors"
+                        className="px-3 py-3 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
                         title={`Ordenar ${sortOrder === 'asc' ? 'descendente' : 'ascendente'}`}
                       >
                         {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
@@ -544,17 +552,27 @@ export function NovelasModal({ isOpen, onClose }: NovelasModalProps) {
                   
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0">
                     <div className="text-sm text-purple-700">
-                      Mostrando {filteredNovelas.length} de {allNovelas.length} novelas
+                      <div className="flex items-center space-x-2">
+                        <div className="bg-purple-100 p-1 rounded-full">
+                          <BookOpen className="h-3 w-3 text-purple-600" />
+                        </div>
+                        <span>Mostrando {filteredNovelas.length} de {allNovelas.length} novelas</span>
+                      </div>
                       {(searchTerm || selectedGenre || selectedYear) && (
-                        <span className="ml-2 text-purple-600">• Filtros activos</span>
+                        <div className="mt-1 flex items-center space-x-1">
+                          <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                          <span className="text-purple-600 text-xs font-medium">Filtros activos</span>
+                        </div>
                       )}
                     </div>
                     
                     {(searchTerm || selectedGenre || selectedYear || sortBy !== 'titulo' || sortOrder !== 'asc') && (
                       <button
                         onClick={clearFilters}
-                        className="text-sm bg-purple-200 hover:bg-purple-300 text-purple-800 px-3 py-1 rounded-lg transition-colors"
+                        className="text-sm bg-purple-200 hover:bg-purple-300 text-purple-800 px-4 py-2 rounded-xl transition-all duration-300 font-medium shadow-sm hover:shadow-md flex items-center space-x-1"
                       >
+                        <X className="h-3 w-3" />
+                        <span>Limpiar filtros</span>
                         Limpiar filtros
                       </button>
                     )}
@@ -636,10 +654,10 @@ export function NovelasModal({ isOpen, onClose }: NovelasModalProps) {
                       return (
                         <div
                           key={novela.id}
-                          className={`p-4 rounded-xl border transition-all ${
+                          className={`p-4 rounded-xl border transition-all duration-300 transform hover:scale-[1.02] ${
                             isSelected 
-                              ? 'bg-purple-50 border-purple-300 shadow-md' 
-                              : 'bg-gray-50 border-gray-200 hover:bg-purple-25 hover:border-purple-200'
+                              ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-300 shadow-lg ring-2 ring-purple-200' 
+                              : 'bg-white border-gray-200 hover:bg-gradient-to-r hover:from-purple-25 hover:to-pink-25 hover:border-purple-200 hover:shadow-md'
                           }`}
                         >
                           <div className="flex items-start space-x-4">
@@ -653,15 +671,15 @@ export function NovelasModal({ isOpen, onClose }: NovelasModalProps) {
                             <div className="flex-1">
                               <div className="flex flex-col sm:flex-row sm:items-start justify-between space-y-3 sm:space-y-0">
                                 <div className="flex-1">
-                                  <p className="font-semibold text-gray-900 mb-2">{novela.titulo}</p>
+                                  <p className="font-semibold text-gray-900 mb-2 text-lg">{novela.titulo}</p>
                                   <div className="flex flex-wrap gap-2 text-sm text-gray-600 mb-3">
-                                    <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                                    <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
                                       {novela.genero}
                                     </span>
-                                    <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                    <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
                                       {novela.capitulos} capítulos
                                     </span>
-                                    <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                                    <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">
                                       {novela.año}
                                     </span>
                                   </div>
@@ -729,12 +747,16 @@ export function NovelasModal({ isOpen, onClose }: NovelasModalProps) {
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">
                           No se encontraron novelas
                         </h3>
-                        <p className="text-gray-600 mb-4">
-                          No hay novelas que coincidan con los filtros seleccionados.
-                        </p>
+                        <div className="text-gray-600 mb-4">
+                          {searchTerm ? (
+                            <p>No se encontraron novelas que contengan "<span className="font-semibold text-purple-600">{searchTerm}</span>" en el título.</p>
+                          ) : (
+                            <p>No hay novelas que coincidan con los filtros seleccionados.</p>
+                          )}
+                        </div>
                         <button
                           onClick={clearFilters}
-                          className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                          className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
                         >
                           Limpiar filtros
                         </button>
